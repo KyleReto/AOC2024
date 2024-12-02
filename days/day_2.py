@@ -73,6 +73,73 @@ class DayCode(Day):
                 count += 1
         return count
 
+    # Refactored after part 1
+    @classmethod
+    def check_report_safety(cls, report: list[int]) -> bool:
+        """
+        Check if a report is safe or not (without the Problem Dampener)
+
+        Args:
+            report: The report to check
+
+        Returns:
+            True if safe, False if not
+        """
+        travel_direction = 0
+        # Assumption: Each report has at least 1 level
+        prev_digit = report[0]
+        for digit in report[1:]:
+            diff = digit - prev_digit
+            if travel_direction == 0:
+                travel_direction = math.copysign(1, diff)
+
+            # Distance toward the correct direction,
+            # i.e if the difference is +3 and we should be ascending,
+            # that's +3 correct dist.
+            # If it's +3 and we should be descending, it's -3.
+            correct_dist = diff * travel_direction
+            if correct_dist > 3 or correct_dist < 1:
+                return False
+            prev_digit = digit
+        return True
+
     @classmethod
     def part_2(cls, in_str: str) -> str:
-        return ""
+        """
+        The problem is the same as part 1, except that we can now use the Problem Dampener.
+        This means that, if any one level could be removed and cause the report to be Safe,
+        then that report should be considered Safe.
+
+        For this part, my initial approach was to check the correct distance as before,
+        and skip one digit if it didn't match. This would leave the prev_digit variable
+        at whatever it was set to before, meaning it would accurately compare the digits as
+        if the wrong digit was missing entirely. This was more efficient (O(n^2)) than the approach
+        I ended up with, but it failed on edge cases like [1 3 2 3 5], since it would try to
+        skip the 2 digit (the correct digit to skip is the first 3).
+        I could have preservedthe efficiency by only checking for removed digits adjacent to
+        a failure point, e.g. both 3 and 2 in the above example, I instead opted for a simple
+        brute force approach where we precalculate all variations on the report missing any
+        arbitrary digit, then check all variations one by one. Combined with moving the report
+        safety check out to its own function, this is more intuitive and easy to maintain,
+        at the cost of a ~2x speed penalty on this input, which is about 1ms.
+
+        Args:
+            in_str: The input string from AoC
+
+        Returns:
+            The number of safe reports in the set
+        """
+        reports = cls.parse_input(in_str)
+        count = 0
+        for report in reports:
+            variations = [report]
+            for idx, _ in enumerate(report):
+                variation = report.copy()
+                variation.pop(idx)
+                variations.append(variation)
+
+            for variation in variations:
+                if cls.check_report_safety(variation):
+                    count += 1
+                    break
+        return count
