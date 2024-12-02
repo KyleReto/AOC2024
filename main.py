@@ -6,7 +6,7 @@ from utils import abstract_day
 
 # This file is just a disposable test harness for my own use,
 # so I didn't write it with cleanliness in mind.
-
+# TODO: Rewrite to add an argument for sample only
 max_day = 0
 day_num = 0
 for filename in listdir("days"):
