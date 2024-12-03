@@ -16,19 +16,15 @@ for filename in listdir("days"):
         matched_val = int(match.group(1))
         max_day = matched_val if matched_val > max_day else max_day
 
-parser.add_argument("day", help="The day of code to run", type=int,
-                    choices=[i for i in range(1,max_day+1)])
+parser.add_argument("-d", "--day", help="The day of code to run", type=int,
+                    choices=[i for i in range(1,max_day+1)], default=max_day)
 parser.add_argument("-s", "--sample-only",
                     help='run only the sample (excluding the full input)', action="store_true")
 args = parser.parse_args()
 
 # Find the associated module by name and run it.
-try:
-    day_module = importlib.import_module("days.day_" + str(args.day))
-    day_code: abstract_day = day_module.DayCode
-except ModuleNotFoundError:
-    print(f"Sorry, it looks like I haven't yet written a solution to day {args.day}. "
-            "Check back later for a solution to that day.\n")
+day_module = importlib.import_module("days.day_" + str(args.day))
+day_code: abstract_day = day_module.DayCode
 try:
     with open("sample.txt", "r", encoding="utf-8") as f:
         test_str = f.read()
