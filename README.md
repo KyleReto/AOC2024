@@ -2,7 +2,7 @@
 
 This repo contains my solutions to [Advent of Code 2024](<https://adventofcode.com/2024>), written in Python 3.
 
-## What is AoC?
+## What is Advent of Code?
 
 * [Advent of Code](<https://adventofcode.com/>), or AoC for short, is an annual set of 25 programming challenges, where one challenge is published every day of December until the 25th.
 The challenges vary in difficulty, but they generally start easy and **get more difficult over the course of the month**, with difficulty spikes on weekends.  
