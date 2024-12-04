@@ -33,10 +33,10 @@ class DayCode(Day):
         """
         # Match anything of the format "mul(X,Y)", where X and Y are 1-3 digit numbers.
         pattern = re.compile(r'mul\((\d{1,3}),(\d{1,3})\)')
-        sum = 0
+        total = 0
         for op in pattern.finditer(in_str):
-            sum += int(op[1]) * int(op[2])
-        return sum
+            total += int(op[1]) * int(op[2])
+        return total
 
     @classmethod
     def part_2(cls, in_str: str) -> str:
@@ -64,8 +64,8 @@ class DayCode(Day):
             # "don't()" or the end of the string, lazy (also the farthest left instance)
         # Captures the contained substring as the only capture group.
         do_pattern = re.compile(r"(?:(?:do\(\))|^)(.*?)(?:(?:don't\(\))|$)", re.S)
-        sum = 0
+        total = 0
         for code in do_pattern.finditer(in_str):
             for op in mul_pattern.finditer(code[1]):
-                sum += int(op[1]) * int(op[2])
-        return sum
+                total += int(op[1]) * int(op[2])
+        return total
