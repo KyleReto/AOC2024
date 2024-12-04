@@ -122,6 +122,19 @@ class DayCode(Day):
         # If the center character isn't "A", we can skip checking it.
         if in_list[row][col] != "A":
             return False
+        # If we're going out of bounds, skip checking this position.
+        if row < 1 or row >= len(in_list) - 1 or \
+                col < 1 or col >= len(in_list[row]) - 1:
+            return False
+
+        for cross_dir in [(cls.Direction.UP_LEFT, cls.Direction.DOWN_RIGHT),
+                          (cls.Direction.UP_RIGHT, cls.Direction.DOWN_LEFT)]:
+            top_leg = in_list[row + cross_dir[0].value[0]][col + cross_dir[0].value[1]]
+            bot_leg = in_list[row + cross_dir[1].value[0]][col + cross_dir[1].value[1]]
+            if top_leg not in ["M", "S"] or bot_leg not in ["M", "S"]:
+                return False
+            if bot_leg == top_leg:
+                return False
         return True
 
     @classmethod
@@ -133,6 +146,18 @@ class DayCode(Day):
         .A.
         S.S
         As before, the MAS strings can be written in any direction.
+
+        My solution is similar to part 1, but focused on the center ("A") instead of the
+        first letter ("X"). Since the relationship between "A"s and "X-MAS"es is 1:1, there's
+        no need to count them. In check_x_mas(), we're checking increasingly specific criteria
+        and eliminating the "A" if it fails any check. We check for the center "A", then if
+        we're in bounds, then for each diagonal: [check if both legs are either "M" or "S",
+        and check that the legs are different from each other]. If any position passes all
+        checks, then that must be the center of an X-MAS. This is easily extensible to checking
+        any direction, e.g. plus shapes, and it's reasonable feasible to extend it to checking for
+        longer cross strings (e.g. "CHRISTMAS") as well by replacing lines 132-137, so I'm quite
+        happy with this.
+
 
         Args:
             in_str: A block of text containing an unknown number of "MAS"es in the shape
