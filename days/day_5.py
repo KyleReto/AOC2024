@@ -40,24 +40,24 @@ class DayCode(Day):
         return rules, data
 
     @classmethod
-    def is_page_valid(cls, rules: dict[int, set[int]], update: list[int],
-                      page_idx: int) -> bool:
+    def make_update_valid(cls, rules: dict[int, set[int]], update: list[int]) -> list[int]:
         """
-        Check whether all pages following this one follow all rules
+        For a given update, sort it so that it becomes valid
 
         Args:
             rules: The set of rules from the input
-            update: The list of pages to check
-            page_idx: The index of the page in the update to check
+            update: The list of pages to re-sort
 
         Returns:
-            True if this page follows all rules w.r.t its successors, False otherwise.
+            The sorted update
         """
-
-        for following_page in update[page_idx + 1:]:
-            if following_page in rules and update[page_idx] in rules[following_page]:
-                return False
-        return True
+        def compare_pages(x, y):
+            if x in rules and y in rules[x]:
+                return -1
+            if y in rules and x in rules[y]:
+                return 1
+            return 0
+        return sorted(update, key=cmp_to_key(compare_pages))
 
     @classmethod
     def part_1(cls, in_str: str) -> str:
@@ -73,15 +73,13 @@ class DayCode(Day):
         I've noticed that for at least the sample data, the rules are transitive -- if a
         rule says A|B and another rule says B|C, no rule will ever say C|A.
 
-        For my approach, I first tried using that transitive property. In the sample data,
-        this is true, but also, if rules A|B and B|C exist, then rule A|C will exist.
-        Using that, I tried creating a "super-rule", a list like [A, B, C] which defines the
-        entire chain of rules, such that all valid lists could be constructed by removing
-        one or more elements of the super-rule. Unfortunately, this doesn't hold true for the
-        full input, so I resorted to individually checking each page number in an update to
-        see if of the pages that follow it violate any rule. I considered doing this in reverse
-        order, but I found that this didn't really remove any complexity, so I just used the
-        naive approach.
+        I initially solved this part with a naive approach which iteratively checked every
+        page number to ensure that every number following it was not disallowed by the rules.
+        However, after solving part 2, I came back and reused the custom sort function here
+        to solve it more efficiently. See the writeup for that section for details. I could
+        have designed a function to return early as soon as it became clear that the entry
+        was not sorted, but I didn't think that was worth the rewrite, especially since
+        there's a pretty good chance that they would compile to the same result anyways.
 
         Args:
             in_str: The input string, which is a list of sorting rules followed by the
@@ -93,39 +91,10 @@ class DayCode(Day):
         middle_sum = 0
         rules, data = cls.parse_input(in_str)
         for entry in data:
-            for page_idx, _ in enumerate(entry):
-                if not cls.is_page_valid(rules, entry, page_idx):
-                    break
-            else:
-                middle_sum += entry[len(entry) // 2]
+            if entry != cls.make_update_valid(rules, entry):
+                continue
+            middle_sum += entry[len(entry) // 2]
         return middle_sum
-
-    @classmethod
-    def make_update_valid(cls, rules: dict[int, set[int]], update: list[int]) -> list[int]:
-        """
-        For a given invalid update, sort it so that it becomes valid
-
-        Args:
-            rules: The set of rules from the input
-            update: The list of pages to re-sort
-
-        Returns:
-            The sorted update
-        """
-        sorted(update, key=cmp_to_key(
-            lambda x,y : x
-        ))
-
-        sorted_update = []
-        for page_to_add in update:
-            sorted_update.insert(0, page_to_add)
-            for idx, _ in enumerate(sorted_update):
-                if cls.is_page_valid(rules, sorted_update, idx):
-                    break
-                temp = sorted_update[idx]
-                sorted_update[idx] = sorted_update[idx+1]
-                sorted_update[idx+1] = temp
-        return sorted_update
 
     @classmethod
     def part_2(cls, in_str: str) -> str:
@@ -134,11 +103,17 @@ class DayCode(Day):
         are to sum the middles values of only the updates which were invalid before, but only after
         sorting them to make them valid.
 
-        My approach here is to use a variation on the bubble sort algorithm, creating a new update
-        from scratch and placing the old update items in it one at a time. Each time a new element
-        is placed at the front of the new update list, we check if that page is valid w.r.t all
-        elements that follow it. If not, we swap it with the next element, such that it bubbles up
-        to its correct position. Unlike most sorting operations, 
+        I initially solved this question with a naive solution, since this type of problem could
+        have weird edge cases to handle, such as contradictory rules or unsortable lists. I was
+        specifically anticipating a case where a rule two rules could come together to imply a
+        third rule, as often happens in similar problems. However, upon further review of the
+        problem, I realized that this doesn't happen in the input, and probably isn't possible given
+        the problem description. This allowed me to use a much simpler approach, which is just a
+        custom comparator function which simply checks the rules to define whether an element must
+        go in front of, behind, or to either side of an arbitrary other element. Doing this means we
+        can just call the built in sort function on the list to sort it. I would have liked to use a
+        key function instead of a comparator, as is recommended for modern python, but I wasn't able
+        to think of a way to define this relationship as a key without overcomplicating it.
 
         Args:
             in_str: The input string, which is a list of sorting rules followed by the
@@ -150,9 +125,7 @@ class DayCode(Day):
         middle_sum = 0
         rules, data = cls.parse_input(in_str)
         for entry in data:
-            for page_idx, _ in enumerate(entry):
-                if not cls.is_page_valid(rules, entry, page_idx):
-                    sorted_entry = cls.make_update_valid(rules, entry)
-                    middle_sum += sorted_entry[len(entry) // 2]
-                    break
+            sorted_entry = cls.make_update_valid(rules, entry)
+            if entry != sorted_entry:
+                middle_sum += sorted_entry[len(entry) // 2]
         return middle_sum
