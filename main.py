@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Harness for all AOC days."""
 import argparse
 import importlib

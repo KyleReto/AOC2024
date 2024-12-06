@@ -14,9 +14,12 @@ leaderboard for the day is full before I publish my code**, [as required by AoC]
 ## How do I run the code?
 
 1. Ensure you have a recent version of Python 3 installed (I use [Python 3.11.5](<https://www.python.org/downloads/release/python-3115/>))
-2. Run `python3 main.py` to run the latest day. You can use the `-h` option for more detailed usage instructions.  
+2. Download your `input.txt` file from the Advent of Code website, and place it in the AOC2024 directory under the name `input.txt`.
+   * Here's the link to the input for day 1: [`https://adventofcode.com/2024/day/1/input`](<https://adventofcode.com/2024/day/1/input>). Replace the number of the day in that URL to test other days.
+   * I'd love to publish my input files here so you can run my code to see how it works, but unfortunately, that's [against the rules of AoC](<https://adventofcode.com/2024/about#faq_copying>). If you want to run my code, you'll need to log in to the site and get your own input files.
+3. Run `./main.py` to run the latest day. You can use the `-h` option for more detailed usage instructions.  
    * I use Bash in Linux (with [WSL](<https://learn.microsoft.com/en-us/windows/wsl/install>)). While the code should run fine in other environments, I can't guarantee that.
-3. You don't *need* to do anything else, but this list is really short and it makes me uncomfortable, so here's some totally unrelated things you should do:
+4. You don't *need* to do anything else, but this list is really short and it makes me uncomfortable, so here's some totally unrelated things you should do:
    * Make some crème brûlée, I like [this recipe](<https://www.kingarthurbaking.com/recipes/classic-creme-brulee-recipe>).
    * Get some friends together and play a board game. My favorite is [Codenames](<https://boardgamegeek.com/boardgame/178900/codenames>).
    * Try a new video game. [Hacknet](<https://store.steampowered.com/app/365450/Hacknet/>) super underrated, give it a try.
