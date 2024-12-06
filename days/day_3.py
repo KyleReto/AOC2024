@@ -47,8 +47,10 @@ class DayCode(Day):
         another do(). We start under the do() condition.
 
         For this one, I decided to get some regex practice in and solve it mostly
-        with that. I created a second pattern to capture any text we should execute (
-        i.e. enclosed by do() and don't()). This meant 
+        with that. I created a second pattern to capture any text we should execute 
+        (i.e. enclosed by "do()" and "don't()"). From there, we can simply run the
+        multiplication pattern on all groups that captured to find all ops we
+        should run, as before.
 
         Args:
             in_str: The input string from AoC
