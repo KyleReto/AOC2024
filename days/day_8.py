@@ -1,4 +1,5 @@
 """Day 8 of Advent of Code 2024"""
+from itertools import permutations, combinations
 from utils.abstract_day import Day
 
 class DayCode(Day):
@@ -35,12 +36,11 @@ class DayCode(Day):
             The list of antinode positions, as (row, col) tuples
         """
         output = []
-        for a_idx, (a_row, a_col) in enumerate(antennae[:-1]):
-            for _, (b_row, b_col) in enumerate(antennae[a_idx+1:]):
-                vector = (b_row - a_row, b_col - a_col)
-                antinode_back = (a_row - vector[0], a_col - vector[1])
-                antinode_forward = (b_row + vector[0], b_col + vector[1])
-                output += [antinode_back, antinode_forward]
+        for (a_row, a_col), (b_row, b_col) in combinations(antennae, 2):
+            vector = (b_row - a_row, b_col - a_col)
+            antinode_back = (a_row - vector[0], a_col - vector[1])
+            antinode_forward = (b_row + vector[0], b_col + vector[1])
+            output += [antinode_back, antinode_forward]
         return output
 
     @classmethod
@@ -57,7 +57,7 @@ class DayCode(Day):
         Antinodes can overlap with both each other and antenna positions.
 
         My approach here looks a bit convoluted, but that's because accessing points in a 2D
-        array is a bit of a pain. For future days, I'll work on a dedicated grid helper class
+        list is a bit of a pain. For future days, I'll work on a dedicated grid helper class
         to simplify this. In the meantime, the solution works by first collecting a dictionary
         of all antennae positions for each frequency. Then, for each frequency, we iterate over
         each unique pair of antennae in the list. For each pair, we find the vector describing
@@ -99,7 +99,6 @@ class DayCode(Day):
                           ) -> list[tuple[int, int]]:
         """
         Get the antinode positions for all antennae of a given frequency.
-        Does not check whether a position is in bounds or not.
 
         Args:
             antennae: The list of antenna positions for a given frequency
@@ -109,16 +108,12 @@ class DayCode(Day):
             The list of antinode positions, as (row, col) tuples
         """
         output = []
-        for a_idx, a_pos in enumerate(antennae[:-1]):
-            for _, b_pos in enumerate(antennae[a_idx+1:]):
-                forward = a_pos, (b_pos[0] - a_pos[0], b_pos[1] - a_pos[1])
-                back = b_pos, (-forward[1][0], -forward[1][1])
-                for start_pos, vector in [forward, back]:
-                    antinode_pos = start_pos
-                    while (antinode_pos[0] in range(0, grid_size[0]) and
-                           antinode_pos[1] in range(0, grid_size[1])):
-                        antinode_pos = (antinode_pos[0] + vector[0], antinode_pos[1] + vector[1])
-                        output += [(antinode_pos[0], antinode_pos[1])]
+        for a_pos, b_pos in permutations(antennae, 2):
+            vector = b_pos[0] - a_pos[0], b_pos[1] - a_pos[1]
+            while (b_pos[0] in range(0, grid_size[0]) and
+                    b_pos[1] in range(0, grid_size[1])):
+                output += [(b_pos[0], b_pos[1])]
+                b_pos = (b_pos[0] + vector[0], b_pos[1] + vector[1])
         return output
 
     @classmethod
@@ -132,11 +127,10 @@ class DayCode(Day):
 
         For my solution, I only rewrote the get_antinodes function, reworking the part that gets
         pairs of nodes into a loop that continues to find antinode positions in a given direction
-        until the position is out of bounds. This runs on both forward and backward vectors, and
-        can be easily modified to work in more directions if necessary. The triple for loop is a bit
-        messy, so for future days I'm definitely going to write proper grid and vector classes to
-        more easily manage 2D arrays, since these types of operations are very common in AoC and
-        are difficult to express concisely in python without external libraries.
+        until the position is out of bounds. To make this simpler, we only draw a line in one
+        direction for each iteration while getting antinodes, and we iterate over the permutations
+        of antennae instead of the combinations, which gives us the line in the other direction for
+        the reverse pair. This is functionally identical, but is more concise.
 
         Args:
             in_str: The input string from AoC, describing a map of antenna positions and frequencies
@@ -157,9 +151,6 @@ class DayCode(Day):
         for frequency, positions in antennae.items():
             freq_antinodes = cls.get_all_antinodes(positions, (len(grid), len(grid[0])))
             for antinode in freq_antinodes:
-                if (antinode[0] not in range(0, len(grid)) or
-                    antinode[1] not in range(0, len(grid[0]))):
-                    continue
                 antinodes_here = antinodes.setdefault(antinode, [])
                 antinodes_here.append(frequency)
         return len(antinodes)
